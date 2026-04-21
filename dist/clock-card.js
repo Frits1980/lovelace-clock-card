@@ -52,6 +52,15 @@ class ClockCard extends HTMLElement {
             var theme = config.theme ? config.theme : {};
             var clock_size = config.size ? config.size : 300;
             var font_size = config.font_size ? config.font_size : 20;
+            // updates_per_hour: how many times per hour the clock redraws.
+            // Default 3600 = once per second (original behaviour).
+            // Use e.g. 12 to update every 5 minutes, 60 for every minute, 1 for once per hour.
+            var updates_per_hour = config.updates_per_hour ? config.updates_per_hour : 3600;
+            // Clamp to at least 1 update/hour to avoid invalid intervals from bad config.
+            if (updates_per_hour < 1) {
+                updates_per_hour = 1;
+            }
+            var update_interval_ms = Math.round(3600000 / updates_per_hour);
             const card = document.createElement('ha-card');
             this.content = document.createElement('div');
             this.content.style.display = "flex";
@@ -84,7 +93,7 @@ class ClockCard extends HTMLElement {
             ctx.translate(radius, radius);
             radius = radius * 0.90
             drawClock();
-            setInterval(drawClock, 1000);
+            setInterval(drawClock, update_interval_ms);
 
             function drawClock() {
                 drawFace(ctx, radius);
